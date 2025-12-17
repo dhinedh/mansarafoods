@@ -6,6 +6,7 @@ import {
   ShoppingBasket,
   ShoppingCart,
   Users,
+  Image,
   Settings,
   LogOut,
 } from 'lucide-react';
@@ -33,6 +34,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     { icon: ShoppingBasket, label: 'Combos', path: '/admin/combos' },
     { icon: ShoppingCart, label: 'Orders', path: '/admin/orders' },
     { icon: Users, label: 'Customers', path: '/admin/customers' },
+    { icon: Image, label: 'Banners', path: '/admin/banners' },
     { icon: Settings, label: 'Settings', path: '/admin/settings' },
   ];
 

@@ -19,6 +19,12 @@ import { Account } from './pages/Account';
 import { AdminDashboard } from './pages/admin/Dashboard';
 import { AdminProducts } from './pages/admin/Products';
 import { AdminOrders } from './pages/admin/Orders';
+import { ProductForm } from './pages/admin/ProductForm';
+import { OffersManagement } from './pages/admin/OffersManagement';
+import { CombosManagement } from './pages/admin/CombosManagement';
+import { Customers } from './pages/admin/Customers';
+import { BannerManagement } from './pages/admin/BannerManagement';
+import { Settings } from './pages/admin/Settings';
 
 function App() {
   return (
@@ -52,7 +58,14 @@ function App() {
           />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/products" element={<AdminProducts />} />
+          <Route path="/admin/products/new" element={<ProductForm />} />
+          <Route path="/admin/products/:id" element={<ProductForm />} />
+          <Route path="/admin/offers" element={<OffersManagement />} />
+          <Route path="/admin/combos" element={<CombosManagement />} />
           <Route path="/admin/orders" element={<AdminOrders />} />
+          <Route path="/admin/customers" element={<Customers />} />
+          <Route path="/admin/banners" element={<BannerManagement />} />
+          <Route path="/admin/settings" element={<Settings />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

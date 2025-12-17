@@ -131,11 +131,11 @@ export function AdminDashboard() {
               View Orders
             </Link>
             <Link
-              to="/admin/combos/new"
+              to="/admin/combos"
               className="p-4 rounded-lg text-center font-semibold border-2 transition-all hover:bg-gray-50"
               style={{ borderColor: '#1F2A7C', color: '#1F2A7C' }}
             >
-              Create Combo
+              Manage Combos
             </Link>
           </div>
         </div>
