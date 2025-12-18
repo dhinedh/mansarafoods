@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Package } from 'lucide-react';
+import { Package, Edit2, X, Check } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { Order } from '../types/database';
@@ -10,6 +10,10 @@ export function Account() {
   const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editMode, setEditMode] = useState(false);
+  const [editingName, setEditingName] = useState('');
+  const [editingPhone, setEditingPhone] = useState('');
+  const [savingProfile, setSavingProfile] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -17,7 +21,11 @@ export function Account() {
       return;
     }
     fetchOrders();
-  }, [user, navigate]);
+    if (profile) {
+      setEditingName(profile.full_name || '');
+      setEditingPhone(profile.phone || '');
+    }
+  }, [user, navigate, profile]);
 
   const fetchOrders = async () => {
     if (!user) return;
@@ -31,6 +39,29 @@ export function Account() {
 
     if (data) setOrders(data);
     setLoading(false);
+  };
+
+  const handleSaveProfile = async () => {
+    if (!user) return;
+
+    setSavingProfile(true);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          full_name: editingName,
+          phone: editingPhone,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', user.id);
+
+      if (!error) {
+        setEditMode(false);
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+    }
+    setSavingProfile(false);
   };
 
   const handleSignOut = async () => {
@@ -66,13 +97,68 @@ export function Account() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           <aside className="lg:col-span-1">
             <div className="bg-white rounded-xl p-6 shadow-sm">
-              <div className="mb-6">
-                <h3 className="font-semibold mb-2" style={{ color: '#1F2A7C' }}>
-                  {profile.full_name || 'User'}
-                </h3>
-                <p className="text-sm text-gray-600">{profile.email}</p>
-                {profile.phone && <p className="text-sm text-gray-600">{profile.phone}</p>}
-              </div>
+              {editMode ? (
+                <div className="space-y-4 mb-6">
+                  <div>
+                    <label className="block text-sm font-semibold mb-2" style={{ color: '#1F2A7C' }}>
+                      Full Name
+                    </label>
+                    <input
+                      type="text"
+                      value={editingName}
+                      onChange={(e) => setEditingName(e.target.value)}
+                      className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-[#E91E63] outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-2" style={{ color: '#1F2A7C' }}>
+                      Phone
+                    </label>
+                    <input
+                      type="tel"
+                      value={editingPhone}
+                      onChange={(e) => setEditingPhone(e.target.value)}
+                      className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-[#E91E63] outline-none"
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleSaveProfile}
+                      disabled={savingProfile}
+                      className="flex-1 py-2 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all hover:shadow-md disabled:opacity-50"
+                      style={{ backgroundColor: '#4CAF50', color: 'white' }}
+                    >
+                      <Check className="w-4 h-4" />
+                      Save
+                    </button>
+                    <button
+                      onClick={() => setEditMode(false)}
+                      className="flex-1 py-2 rounded-lg font-semibold border-2 transition-all hover:bg-gray-50"
+                      style={{ borderColor: '#1F2A7C', color: '#1F2A7C' }}
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="mb-6">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h3 className="font-semibold mb-2" style={{ color: '#1F2A7C' }}>
+                        {profile.full_name || 'User'}
+                      </h3>
+                      <p className="text-sm text-gray-600">{profile.email}</p>
+                      {profile.phone && <p className="text-sm text-gray-600">{profile.phone}</p>}
+                    </div>
+                    <button
+                      onClick={() => setEditMode(true)}
+                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                    >
+                      <Edit2 className="w-4 h-4" style={{ color: '#1F2A7C' }} />
+                    </button>
+                  </div>
+                </div>
+              )}
 
               <button
                 onClick={handleSignOut}

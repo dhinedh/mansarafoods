@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -7,8 +7,17 @@ export function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn } = useAuth();
+  const [loginType, setLoginType] = useState<'customer' | 'admin'>('customer');
+  const { signIn, profile } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (profile?.is_admin && loginType === 'admin') {
+      navigate('/admin');
+    } else if (profile && !profile.is_admin && loginType === 'customer') {
+      navigate('/');
+    }
+  }, [profile, loginType, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,15 +26,17 @@ export function Login() {
 
     try {
       await signIn(email, password);
-      navigate('/');
+      setTimeout(() => {
+        navigate(loginType === 'admin' ? '/admin' : '/');
+      }, 500);
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
       } else {
         setError('Failed to login');
       }
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -35,7 +46,43 @@ export function Login() {
           <h2 className="text-3xl font-bold mb-2 text-center" style={{ color: '#1F2A7C' }}>
             Welcome Back
           </h2>
-          <p className="text-gray-600 text-center mb-8">Login to your MANSARA account</p>
+
+          <div className="flex gap-2 mb-6">
+            <button
+              onClick={() => setLoginType('customer')}
+              className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-all ${
+                loginType === 'customer'
+                  ? 'text-white'
+                  : 'border-2 text-gray-600'
+              }`}
+              style={{
+                backgroundColor: loginType === 'customer' ? '#FDB913' : 'transparent',
+                color: loginType === 'customer' ? '#1F2A7C' : '#1F2A7C',
+                borderColor: loginType === 'customer' ? 'transparent' : '#E0E0E0',
+              }}
+            >
+              Customer
+            </button>
+            <button
+              onClick={() => setLoginType('admin')}
+              className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-all ${
+                loginType === 'admin'
+                  ? 'text-white'
+                  : 'border-2 text-gray-600'
+              }`}
+              style={{
+                backgroundColor: loginType === 'admin' ? '#1F2A7C' : 'transparent',
+                color: loginType === 'admin' ? 'white' : '#1F2A7C',
+                borderColor: loginType === 'admin' ? 'transparent' : '#E0E0E0',
+              }}
+            >
+              Admin
+            </button>
+          </div>
+
+          <p className="text-gray-600 text-center mb-6 text-sm">
+            {loginType === 'customer' ? 'Login to your customer account' : 'Login to admin panel'}
+          </p>
 
           {error && (
             <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { Minus, Plus, ShoppingCart } from 'lucide-react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { Minus, Plus, ShoppingCart, Check } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Product } from '../types/database';
 import { useCart } from '../hooks/useCart';
@@ -8,11 +8,13 @@ import { useAuth } from '../contexts/AuthContext';
 
 export function ProductDetail() {
   const { slug } = useParams();
+  const navigate = useNavigate();
   const [product, setProduct] = useState<Product | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
+  const [addSuccess, setAddSuccess] = useState(false);
   const { addToCart } = useCart();
   const { user } = useAuth();
 
@@ -37,7 +39,7 @@ export function ProductDetail() {
 
   const handleAddToCart = async () => {
     if (!user) {
-      window.location.href = '/login';
+      navigate('/login');
       return;
     }
 
@@ -47,6 +49,8 @@ export function ProductDetail() {
     try {
       await addToCart(product.id, undefined, quantity);
       setQuantity(1);
+      setAddSuccess(true);
+      setTimeout(() => setAddSuccess(false), 3000);
     } catch (error) {
       console.error('Error adding to cart:', error);
     }
@@ -164,10 +168,19 @@ export function ProductDetail() {
                   onClick={handleAddToCart}
                   disabled={adding || product.stock_quantity === 0}
                   className="flex-1 py-3 px-6 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all hover:shadow-md disabled:opacity-50"
-                  style={{ backgroundColor: '#FDB913', color: '#1F2A7C' }}
+                  style={{ backgroundColor: addSuccess ? '#4CAF50' : '#FDB913', color: '#1F2A7C' }}
                 >
-                  <ShoppingCart className="w-5 h-5" />
-                  {product.stock_quantity === 0 ? 'Out of Stock' : 'Add to Cart'}
+                  {addSuccess ? (
+                    <>
+                      <Check className="w-5 h-5" />
+                      Added to Cart!
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingCart className="w-5 h-5" />
+                      {product.stock_quantity === 0 ? 'Out of Stock' : adding ? 'Adding...' : 'Add to Cart'}
+                    </>
+                  )}
                 </button>
               </div>
 

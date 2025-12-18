@@ -122,7 +122,28 @@ To access the admin panel:
 4. Log out and log back in
 5. Access the admin panel at `/admin`
 
+### User Account Features
+
+**User Account Page** (`/account`)
+- View personal profile information (name, email, phone)
+- Edit profile by clicking the edit icon
+- Update name and phone number
+- View complete order history
+- Track order status in real-time
+- Check order amounts and payment status
+- Logout option on sidebar
+
 ### Using the Admin Panel
+
+To access the admin panel, you need an admin account. Admin login is separate from customer login.
+
+**How to Login as Admin:**
+
+1. Go to `/login`
+2. Click the **Admin** tab (instead of Customer)
+3. Enter admin email and password
+4. You'll be redirected to `/admin` dashboard
+5. Only accounts with admin privileges can access the admin panel
 
 **Dashboard** (`/admin`)
 - View key business metrics at a glance
@@ -178,6 +199,64 @@ To access the admin panel:
 - Configure social media links
 - View brand colors
 - Settings save to database
+
+## Login Instructions
+
+### Customer Login Flow
+
+1. Click the **User icon** in the header (top right)
+2. If not logged in, you'll be redirected to `/login`
+3. Make sure **Customer tab** is selected (default)
+4. Enter your email and password
+5. Click **Login**
+6. You'll be redirected to the homepage
+7. Now you can:
+   - Click the **User icon** again to go to `/account`
+   - Browse products and **Add to Cart**
+   - See your orders in account page
+
+### Admin Login Flow
+
+1. Click the **User icon** in the header (top right)
+2. If not logged in, you'll be redirected to `/login`
+3. Click the **Admin tab**
+4. Enter admin email and password
+5. Click **Login**
+6. You'll be redirected to the admin dashboard (`/admin`)
+7. Use the sidebar to navigate admin features
+
+### Creating an Admin Account (First Time Setup)
+
+To make a user account an admin:
+
+1. Create a customer account by signing up normally
+2. Note the email used during signup
+3. Go to Supabase Dashboard → SQL Editor
+4. Run this query:
+   ```sql
+   UPDATE profiles SET is_admin = true WHERE email = 'your-email@example.com';
+   ```
+5. Replace `your-email@example.com` with your actual email
+6. Log out and log back in
+7. Use the **Admin tab** at login to access admin panel
+
+### Add to Cart Flow
+
+1. Login as a customer
+2. Browse products or view product details
+3. Set quantity using + and - buttons
+4. Click **Add to Cart**
+5. Button turns green showing "Added to Cart!"
+6. Click **Shopping Cart icon** in header to view cart
+7. Update quantities or remove items as needed
+8. Proceed to checkout
+
+### Cart & Navigation
+
+- **Cart icon** in header shows item count
+- Click to visit `/cart`
+- **User icon** in header navigates to `/account` when logged in
+- After login, user icon takes you to account page instead of login
 
 ## Available Routes
 
@@ -240,13 +319,47 @@ The application uses the following main tables:
 
 ## Completed Features
 
-The admin panel is now FULLY FUNCTIONAL with all major features implemented:
+### Admin Panel (FULLY FUNCTIONAL)
 - ✅ Complete product management (add, edit, delete, images, pricing, inventory)
 - ✅ Offers management system
 - ✅ Combo creation and management interface
 - ✅ Customer management with statistics
 - ✅ Banner management system
 - ✅ Settings configuration
+- ✅ Admin login with separate Admin tab
+
+### User Features (FULLY FUNCTIONAL)
+- ✅ Customer login and signup
+- ✅ Add to cart with success feedback
+- ✅ Cart functionality with quantity management
+- ✅ User account page with profile editing
+- ✅ Profile update (name, phone)
+- ✅ Order history with status tracking
+- ✅ Proper navigation after login (to /account or /admin)
+
+## Recent Updates & Fixes
+
+### Add to Cart & Cart Functionality
+- ✅ Fixed navigation after clicking user icon (now goes to /account when logged in)
+- ✅ Added success feedback when adding items to cart (green button with checkmark)
+- ✅ Fixed login redirect to use navigate instead of window.location.href
+- ✅ Cart icon in header shows item count
+- ✅ Cart page is fully functional for logged-in users
+- ✅ Add loading state while adding to cart
+
+### Account Page Enhancements
+- ✅ Added profile editing capability
+- ✅ Edit name and phone number
+- ✅ Save profile updates to database
+- ✅ Edit button with pencil icon
+- ✅ Full order history view
+- ✅ Order tracking with status colors
+
+### Admin & Login Improvements
+- ✅ Separate Admin login tab on login page
+- ✅ Admin authentication check on login
+- ✅ Proper redirection to /admin dashboard
+- ✅ Updated admin navigation
 
 ## Future Enhancements
 
@@ -263,6 +376,8 @@ Additional features that could enhance the platform:
 - Sales analytics and reports
 - Discount codes/coupons system
 - Multi-language support
+- Password reset functionality
+- Email verification
 
 ## Support
 
