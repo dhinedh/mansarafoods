@@ -47,6 +47,12 @@ export function Login() {
             Welcome Back
           </h2>
 
+          <div className="p-3 mb-4 bg-blue-50 border border-blue-200 rounded-lg text-xs">
+            <p className="font-semibold text-blue-900 mb-1">Demo Credentials:</p>
+            <p className="text-blue-800">Customer: customer@example.com / customer123</p>
+            <p className="text-blue-800">Admin: admin@mansarafoods.com / admin123</p>
+          </div>
+
           <div className="flex gap-2 mb-6">
             <button
               onClick={() => setLoginType('customer')}

@@ -1,7 +1,11 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { User } from '@supabase/supabase-js';
-import { supabase } from '../lib/supabase';
 import { Profile } from '../types/database';
+import { mockAdminUser, mockCustomerUser } from '../data/mockData';
+
+interface User {
+  id: string;
+  email: string;
+}
 
 interface AuthContextType {
   user: User | null;
@@ -10,6 +14,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, fullName: string, phone: string) => Promise<void>;
   signOut: () => Promise<void>;
+  updateProfile: (updates: Partial<Profile>) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,69 +25,88 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfile(session.user.id);
-      } else {
-        setLoading(false);
-      }
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      (async () => {
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          await fetchProfile(session.user.id);
-        } else {
-          setProfile(null);
-        }
-      })();
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const fetchProfile = async (userId: string) => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .maybeSingle();
-
-    if (!error && data) {
-      setProfile(data);
+    const storedUser = localStorage.getItem('mansara_user');
+    if (storedUser) {
+      const userData = JSON.parse(storedUser);
+      setUser(userData);
+      setProfile(userData.profile);
     }
     setLoading(false);
-  };
+  }, []);
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) throw error;
+    if (email === 'admin@mansarafoods.com' && password === 'admin123') {
+      const userData = {
+        id: mockAdminUser.id,
+        email: mockAdminUser.email,
+        profile: mockAdminUser
+      };
+      localStorage.setItem('mansara_user', JSON.stringify(userData));
+      setUser({ id: userData.id, email: userData.email });
+      setProfile(mockAdminUser);
+    } else if (email === 'customer@example.com' && password === 'customer123') {
+      const userData = {
+        id: mockCustomerUser.id,
+        email: mockCustomerUser.email,
+        profile: mockCustomerUser
+      };
+      localStorage.setItem('mansara_user', JSON.stringify(userData));
+      setUser({ id: userData.id, email: userData.email });
+      setProfile(mockCustomerUser);
+    } else {
+      throw new Error('Invalid email or password. Try: customer@example.com / customer123 or admin@mansarafoods.com / admin123');
+    }
   };
 
   const signUp = async (email: string, password: string, fullName: string, phone: string) => {
-    const { data, error } = await supabase.auth.signUp({ email, password });
-    if (error) throw error;
+    const newUser: Profile = {
+      id: 'user-' + Date.now(),
+      email,
+      full_name: fullName,
+      phone,
+      is_admin: false,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
 
-    if (data.user) {
-      await supabase.from('profiles').insert({
-        id: data.user.id,
-        email,
-        full_name: fullName,
-        phone,
-        is_admin: false,
-      });
-    }
+    const userData = {
+      id: newUser.id,
+      email: newUser.email,
+      profile: newUser
+    };
+
+    localStorage.setItem('mansara_user', JSON.stringify(userData));
+    setUser({ id: userData.id, email: userData.email });
+    setProfile(newUser);
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+    localStorage.removeItem('mansara_user');
+    setUser(null);
+    setProfile(null);
+  };
+
+  const updateProfile = async (updates: Partial<Profile>) => {
+    if (!user || !profile) return;
+
+    const updatedProfile = {
+      ...profile,
+      ...updates,
+      updated_at: new Date().toISOString()
+    };
+
+    const userData = {
+      id: user.id,
+      email: user.email,
+      profile: updatedProfile
+    };
+
+    localStorage.setItem('mansara_user', JSON.stringify(userData));
+    setProfile(updatedProfile);
   };
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, profile, loading, signIn, signUp, signOut, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );

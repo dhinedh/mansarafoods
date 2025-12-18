@@ -2,14 +2,12 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Package, Edit2, X, Check } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { supabase } from '../lib/supabase';
 import { Order } from '../types/database';
 
 export function Account() {
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, signOut, updateProfile } = useAuth();
   const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
   const [editingName, setEditingName] = useState('');
   const [editingPhone, setEditingPhone] = useState('');
@@ -27,18 +25,15 @@ export function Account() {
     }
   }, [user, navigate, profile]);
 
-  const fetchOrders = async () => {
+  const fetchOrders = () => {
     if (!user) return;
 
-    setLoading(true);
-    const { data } = await supabase
-      .from('orders')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
+    const ordersKey = `mansara_orders_${user.id}`;
+    const storedOrders = localStorage.getItem(ordersKey);
 
-    if (data) setOrders(data);
-    setLoading(false);
+    if (storedOrders) {
+      setOrders(JSON.parse(storedOrders));
+    }
   };
 
   const handleSaveProfile = async () => {
@@ -46,18 +41,11 @@ export function Account() {
 
     setSavingProfile(true);
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          full_name: editingName,
-          phone: editingPhone,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', user.id);
-
-      if (!error) {
-        setEditMode(false);
-      }
+      await updateProfile({
+        full_name: editingName,
+        phone: editingPhone
+      });
+      setEditMode(false);
     } catch (error) {
       console.error('Error updating profile:', error);
     }
@@ -176,11 +164,7 @@ export function Account() {
                 Order History
               </h2>
 
-              {loading ? (
-                <div className="text-center py-12">
-                  <p className="text-gray-600">Loading orders...</p>
-                </div>
-              ) : orders.length === 0 ? (
+              {orders.length === 0 ? (
                 <div className="text-center py-12">
                   <Package className="w-16 h-16 mx-auto mb-4 text-gray-300" />
                   <p className="text-gray-600">No orders yet</p>

@@ -1,27 +1,10 @@
-import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Percent, ShoppingBasket, Sparkles, Leaf, Heart, Shield } from 'lucide-react';
-import { supabase } from '../lib/supabase';
-import { Product } from '../types/database';
+import { mockProducts } from '../data/mockData';
 import { ProductCard } from '../components/ProductCard';
 
 export function Home() {
-  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
-
-  useEffect(() => {
-    fetchFeaturedProducts();
-  }, []);
-
-  const fetchFeaturedProducts = async () => {
-    const { data } = await supabase
-      .from('products')
-      .select('*')
-      .eq('is_featured', true)
-      .eq('is_active', true)
-      .limit(6);
-
-    if (data) setFeaturedProducts(data);
-  };
+  const featuredProducts = mockProducts.filter(p => p.is_featured && p.is_active).slice(0, 6);
 
   return (
     <div>

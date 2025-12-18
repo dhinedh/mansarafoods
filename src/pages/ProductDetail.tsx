@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Minus, Plus, ShoppingCart, Check } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { getProductBySlug } from '../data/mockData';
 import { Product } from '../types/database';
 import { useCart } from '../hooks/useCart';
 import { useAuth } from '../contexts/AuthContext';
@@ -9,33 +9,13 @@ import { useAuth } from '../contexts/AuthContext';
 export function ProductDetail() {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const [product, setProduct] = useState<Product | null>(null);
+  const [product] = useState<Product | null>(slug ? getProductBySlug(slug) || null : null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
   const [addSuccess, setAddSuccess] = useState(false);
   const { addToCart } = useCart();
   const { user } = useAuth();
-
-  useEffect(() => {
-    if (slug) fetchProduct();
-  }, [slug]);
-
-  const fetchProduct = async () => {
-    setLoading(true);
-    const { data } = await supabase
-      .from('products')
-      .select('*')
-      .eq('slug', slug)
-      .eq('is_active', true)
-      .maybeSingle();
-
-    if (data) {
-      setProduct(data);
-    }
-    setLoading(false);
-  };
 
   const handleAddToCart = async () => {
     if (!user) {
@@ -56,14 +36,6 @@ export function ProductDetail() {
     }
     setAdding(false);
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-600">Loading product...</p>
-      </div>
-    );
-  }
 
   if (!product) {
     return (

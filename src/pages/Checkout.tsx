@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../hooks/useCart';
 import { useAuth } from '../contexts/AuthContext';
-import { supabase } from '../lib/supabase';
+import { Order } from '../types/database';
 
 export function Checkout() {
   const { cartItems, clearCart } = useCart();
@@ -37,50 +37,32 @@ export function Checkout() {
     try {
       const orderNumber = `ORD${Date.now()}`;
 
-      const { data: order, error: orderError } = await supabase
-        .from('orders')
-        .insert({
-          order_number: orderNumber,
-          user_id: user.id,
-          total_amount: subtotal,
-          payment_status: 'pending',
-          payment_method: formData.payment_method,
-          order_status: 'pending',
-          shipping_address: {
-            full_name: formData.full_name,
-            phone: formData.phone,
-            address_line1: formData.address_line1,
-            address_line2: formData.address_line2,
-            city: formData.city,
-            state: formData.state,
-            pincode: formData.pincode,
-          },
-        })
-        .select()
-        .single();
+      const newOrder: Order = {
+        id: 'order-' + Date.now(),
+        order_number: orderNumber,
+        user_id: user.id,
+        total_amount: subtotal,
+        payment_status: 'pending',
+        payment_method: formData.payment_method,
+        order_status: 'pending',
+        shipping_address: {
+          full_name: formData.full_name,
+          phone: formData.phone,
+          address_line1: formData.address_line1,
+          address_line2: formData.address_line2,
+          city: formData.city,
+          state: formData.state,
+          pincode: formData.pincode,
+        },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
 
-      if (orderError) throw orderError;
-
-      const orderItems = cartItems.map((item) => {
-        const itemName = item.product ? item.product.name : item.combo?.name || '';
-        const itemPrice = item.product
-          ? item.product.offer_price || item.product.price
-          : item.combo?.combo_price || 0;
-
-        return {
-          order_id: order.id,
-          product_id: item.product_id,
-          combo_id: item.combo_id,
-          product_name: itemName,
-          quantity: item.quantity,
-          unit_price: itemPrice,
-          total_price: itemPrice * item.quantity,
-        };
-      });
-
-      const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
-
-      if (itemsError) throw itemsError;
+      const ordersKey = `mansara_orders_${user.id}`;
+      const existingOrders = localStorage.getItem(ordersKey);
+      const orders = existingOrders ? JSON.parse(existingOrders) : [];
+      orders.unshift(newOrder);
+      localStorage.setItem(ordersKey, JSON.stringify(orders));
 
       await clearCart();
 

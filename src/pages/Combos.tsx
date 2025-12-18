@@ -1,37 +1,12 @@
-import { useEffect, useState } from 'react';
 import { ShoppingCart } from 'lucide-react';
-import { supabase } from '../lib/supabase';
-import { Combo, ComboItem } from '../types/database';
+import { mockCombos, getComboProducts } from '../data/mockData';
 import { useCart } from '../hooks/useCart';
 import { useAuth } from '../contexts/AuthContext';
 
 export function Combos() {
-  const [combos, setCombos] = useState<(Combo & { items?: ComboItem[] })[]>([]);
-  const [loading, setLoading] = useState(true);
+  const combos = mockCombos.filter(c => c.is_active);
   const { addToCart } = useCart();
   const { user } = useAuth();
-
-  useEffect(() => {
-    fetchCombos();
-  }, []);
-
-  const fetchCombos = async () => {
-    setLoading(true);
-    const { data } = await supabase
-      .from('combos')
-      .select(`
-        *,
-        items:combo_items(
-          *,
-          product:products(*)
-        )
-      `)
-      .eq('is_active', true)
-      .order('created_at', { ascending: false });
-
-    if (data) setCombos(data);
-    setLoading(false);
-  };
 
   const handleAddToCart = async (comboId: string) => {
     if (!user) {
@@ -63,11 +38,7 @@ export function Combos() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-12">
-        {loading ? (
-          <div className="text-center py-12">
-            <p className="text-gray-600">Loading combos...</p>
-          </div>
-        ) : combos.length === 0 ? (
+        {combos.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-600">No combos available at the moment</p>
           </div>
@@ -76,6 +47,7 @@ export function Combos() {
             {combos.map((combo) => {
               const savings = combo.original_price - combo.combo_price;
               const savingsPercent = Math.round((savings / combo.original_price) * 100);
+              const comboProducts = getComboProducts(combo.id);
 
               return (
                 <div
@@ -99,15 +71,15 @@ export function Combos() {
                       <p className="text-gray-600 text-sm mb-4">{combo.description}</p>
                     )}
 
-                    {combo.items && combo.items.length > 0 && (
+                    {comboProducts.length > 0 && (
                       <div className="mb-4">
                         <p className="text-sm font-semibold mb-2" style={{ color: '#1F2A7C' }}>
                           Includes:
                         </p>
                         <ul className="space-y-1">
-                          {combo.items.map((item) => (
-                            <li key={item.id} className="text-sm text-gray-600">
-                              • {item.quantity}x {item.product?.name}
+                          {comboProducts.map((item, idx) => (
+                            <li key={idx} className="text-sm text-gray-600">
+                              • {item.quantity}x {item.product.name}
                             </li>
                           ))}
                         </ul>

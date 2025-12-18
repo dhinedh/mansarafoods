@@ -1,28 +1,8 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
-import { Product } from '../types/database';
+import { mockProducts } from '../data/mockData';
 import { ProductCard } from '../components/ProductCard';
 
 export function NewArrivals() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchNewArrivals();
-  }, []);
-
-  const fetchNewArrivals = async () => {
-    setLoading(true);
-    const { data } = await supabase
-      .from('products')
-      .select('*')
-      .eq('is_new_arrival', true)
-      .eq('is_active', true)
-      .order('created_at', { ascending: false });
-
-    if (data) setProducts(data);
-    setLoading(false);
-  };
+  const products = mockProducts.filter(p => p.is_new_arrival && p.is_active);
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#FFFDF7' }}>
@@ -41,11 +21,7 @@ export function NewArrivals() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-12">
-        {loading ? (
-          <div className="text-center py-12">
-            <p className="text-gray-600">Loading new arrivals...</p>
-          </div>
-        ) : products.length === 0 ? (
+        {products.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-600">No new arrivals at the moment</p>
           </div>

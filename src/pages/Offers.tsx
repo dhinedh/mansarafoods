@@ -1,28 +1,8 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
-import { Product } from '../types/database';
+import { mockProducts } from '../data/mockData';
 import { ProductCard } from '../components/ProductCard';
 
 export function Offers() {
-  const [offers, setOffers] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchOffers();
-  }, []);
-
-  const fetchOffers = async () => {
-    setLoading(true);
-    const { data } = await supabase
-      .from('products')
-      .select('*')
-      .eq('is_offer', true)
-      .eq('is_active', true)
-      .order('created_at', { ascending: false });
-
-    if (data) setOffers(data);
-    setLoading(false);
-  };
+  const offers = mockProducts.filter(p => p.is_offer && p.is_active);
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#FFFDF7' }}>
@@ -41,11 +21,7 @@ export function Offers() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-12">
-        {loading ? (
-          <div className="text-center py-12">
-            <p className="text-gray-600">Loading offers...</p>
-          </div>
-        ) : offers.length === 0 ? (
+        {offers.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-600">No offers available at the moment</p>
           </div>

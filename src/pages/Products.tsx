@@ -1,19 +1,13 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
-import { Product } from '../types/database';
+import { useState, useEffect } from 'react';
+import { mockProducts } from '../data/mockData';
 import { ProductCard } from '../components/ProductCard';
 
 export function Products() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const products = mockProducts.filter(p => p.is_active);
+  const [filteredProducts, setFilteredProducts] = useState(products);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [loading, setLoading] = useState(true);
 
   const categories = ['all', 'Porridge Mixes', 'Oil & Ghee'];
-
-  useEffect(() => {
-    fetchProducts();
-  }, []);
 
   useEffect(() => {
     if (selectedCategory === 'all') {
@@ -21,22 +15,7 @@ export function Products() {
     } else {
       setFilteredProducts(products.filter((p) => p.category === selectedCategory));
     }
-  }, [selectedCategory, products]);
-
-  const fetchProducts = async () => {
-    setLoading(true);
-    const { data } = await supabase
-      .from('products')
-      .select('*')
-      .eq('is_active', true)
-      .order('created_at', { ascending: false });
-
-    if (data) {
-      setProducts(data);
-      setFilteredProducts(data);
-    }
-    setLoading(false);
-  };
+  }, [selectedCategory]);
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#FFFDF7' }}>
@@ -80,11 +59,7 @@ export function Products() {
           </aside>
 
           <div className="flex-1">
-            {loading ? (
-              <div className="text-center py-12">
-                <p className="text-gray-600">Loading products...</p>
-              </div>
-            ) : filteredProducts.length === 0 ? (
+            {filteredProducts.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-gray-600">No products found</p>
               </div>

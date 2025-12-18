@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { CartItem } from '../types/database';
+import { getProductById, getComboById } from '../data/mockData';
 
 export function useCart() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -19,24 +19,33 @@ export function useCart() {
     }
   }, [user]);
 
-  const fetchCart = async () => {
+  const fetchCart = () => {
     if (!user) return;
 
     setLoading(true);
-    const { data, error } = await supabase
-      .from('cart')
-      .select(`
-        *,
-        product:products(*),
-        combo:combos(*)
-      `)
-      .eq('user_id', user.id);
+    const cartKey = `mansara_cart_${user.id}`;
+    const storedCart = localStorage.getItem(cartKey);
 
-    if (!error && data) {
-      setCartItems(data);
-      setCartCount(data.reduce((sum, item) => sum + item.quantity, 0));
+    if (storedCart) {
+      const items: CartItem[] = JSON.parse(storedCart);
+      const itemsWithData = items.map(item => ({
+        ...item,
+        product: item.product_id ? getProductById(item.product_id) : undefined,
+        combo: item.combo_id ? getComboById(item.combo_id) : undefined
+      }));
+      setCartItems(itemsWithData);
+      setCartCount(items.reduce((sum, item) => sum + item.quantity, 0));
+    } else {
+      setCartItems([]);
+      setCartCount(0);
     }
     setLoading(false);
+  };
+
+  const saveCart = (items: CartItem[]) => {
+    if (!user) return;
+    const cartKey = `mansara_cart_${user.id}`;
+    localStorage.setItem(cartKey, JSON.stringify(items));
   };
 
   const addToCart = async (productId?: string, comboId?: string, quantity: number = 1) => {
@@ -53,15 +62,21 @@ export function useCart() {
     if (existingItem) {
       await updateCartQuantity(existingItem.id, existingItem.quantity + quantity);
     } else {
-      const { error } = await supabase.from('cart').insert({
+      const newItem: CartItem = {
+        id: 'cart-' + Date.now(),
         user_id: user.id,
         product_id: productId,
         combo_id: comboId,
         quantity,
-      });
-
-      if (error) throw error;
-      await fetchCart();
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        product: productId ? getProductById(productId) : undefined,
+        combo: comboId ? getComboById(comboId) : undefined
+      };
+      const updatedItems = [...cartItems, newItem];
+      setCartItems(updatedItems);
+      setCartCount(updatedItems.reduce((sum, item) => sum + item.quantity, 0));
+      saveCart(updatedItems);
     }
   };
 
@@ -71,29 +86,29 @@ export function useCart() {
       return;
     }
 
-    const { error } = await supabase
-      .from('cart')
-      .update({ quantity, updated_at: new Date().toISOString() })
-      .eq('id', cartItemId);
-
-    if (error) throw error;
-    await fetchCart();
+    const updatedItems = cartItems.map(item =>
+      item.id === cartItemId
+        ? { ...item, quantity, updated_at: new Date().toISOString() }
+        : item
+    );
+    setCartItems(updatedItems);
+    setCartCount(updatedItems.reduce((sum, item) => sum + item.quantity, 0));
+    saveCart(updatedItems);
   };
 
   const removeFromCart = async (cartItemId: string) => {
-    const { error } = await supabase.from('cart').delete().eq('id', cartItemId);
-
-    if (error) throw error;
-    await fetchCart();
+    const updatedItems = cartItems.filter(item => item.id !== cartItemId);
+    setCartItems(updatedItems);
+    setCartCount(updatedItems.reduce((sum, item) => sum + item.quantity, 0));
+    saveCart(updatedItems);
   };
 
   const clearCart = async () => {
     if (!user) return;
-
-    const { error } = await supabase.from('cart').delete().eq('user_id', user.id);
-
-    if (error) throw error;
-    await fetchCart();
+    setCartItems([]);
+    setCartCount(0);
+    const cartKey = `mansara_cart_${user.id}`;
+    localStorage.removeItem(cartKey);
   };
 
   return {
