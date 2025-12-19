@@ -12,12 +12,14 @@ export function Login() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (profile?.is_admin && loginType === 'admin') {
-      navigate('/admin');
-    } else if (profile && !profile.is_admin && loginType === 'customer') {
-      navigate('/');
+    if (profile) {
+      if (profile.is_admin) {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
     }
-  }, [profile, loginType, navigate]);
+  }, [profile, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,9 +28,7 @@ export function Login() {
 
     try {
       await signIn(email, password);
-      setTimeout(() => {
-        navigate(loginType === 'admin' ? '/admin' : '/');
-      }, 500);
+      // Navigation is handled by the useEffect hook above
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);

@@ -20,7 +20,15 @@ interface AdminLayoutProps {
 export function AdminLayout({ children }: AdminLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { profile, signOut } = useAuth();
+  const { profile, signOut, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#FFFDF7' }}>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1F2A7C]"></div>
+      </div>
+    );
+  }
 
   if (!profile?.is_admin) {
     navigate('/');
@@ -62,11 +70,10 @@ export function AdminLayout({ children }: AdminLayoutProps) {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                  isActive
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive
                     ? 'font-semibold'
                     : 'text-gray-600 hover:bg-gray-50'
-                }`}
+                  }`}
                 style={isActive ? { backgroundColor: '#FFF2CC', color: '#1F2A7C' } : {}}
               >
                 <Icon className="w-5 h-5" />
