@@ -16,6 +16,7 @@ import { Contact } from './pages/Contact';
 import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
 import { Account } from './pages/Account';
+import { TrackOrder } from './pages/TrackOrder';
 import { AdminDashboard } from './pages/admin/Dashboard';
 import { AdminProducts } from './pages/admin/Products';
 import { AdminOrders } from './pages/admin/Orders';
@@ -51,6 +52,7 @@ function App() {
                   <Route path="/login" element={<Login />} />
                   <Route path="/signup" element={<Signup />} />
                   <Route path="/account" element={<Account />} />
+                  <Route path="/track-order/:orderNumber" element={<TrackOrder />} />
                 </Routes>
                 <Footer />
               </>

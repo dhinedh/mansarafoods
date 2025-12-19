@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Eye } from 'lucide-react';
 import { AdminLayout } from '../../components/AdminLayout';
-import { supabase } from '../../lib/supabase';
+import { mockOrders } from '../../data/mockData';
 import { Order } from '../../types/database';
 
 export function AdminOrders() {
@@ -13,28 +13,16 @@ export function AdminOrders() {
     fetchOrders();
   }, []);
 
-  const fetchOrders = async () => {
+  const fetchOrders = () => {
     setLoading(true);
-    const { data } = await supabase
-      .from('orders')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (data) setOrders(data);
+    setOrders(mockOrders);
     setLoading(false);
   };
 
-  const handleStatusUpdate = async (orderId: string, newStatus: string) => {
-    const { error } = await supabase
-      .from('orders')
-      .update({ order_status: newStatus, updated_at: new Date().toISOString() })
-      .eq('id', orderId);
-
-    if (!error) {
-      setOrders(orders.map((o) => (o.id === orderId ? { ...o, order_status: newStatus } : o)));
-      if (selectedOrder?.id === orderId) {
-        setSelectedOrder({ ...selectedOrder, order_status: newStatus });
-      }
+  const handleStatusUpdate = (orderId: string, newStatus: string) => {
+    setOrders(orders.map((o) => (o.id === orderId ? { ...o, order_status: newStatus } : o)));
+    if (selectedOrder?.id === orderId) {
+      setSelectedOrder({ ...selectedOrder, order_status: newStatus });
     }
   };
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { AdminLayout } from '../../components/AdminLayout';
-import { supabase } from '../../lib/supabase';
+import { mockProducts } from '../../data/mockData';
 import { Product } from '../../types/database';
 
 export function OffersManagement() {
@@ -11,47 +11,22 @@ export function OffersManagement() {
     fetchProducts();
   }, []);
 
-  const fetchProducts = async () => {
+  const fetchProducts = () => {
     setLoading(true);
-    const { data } = await supabase
-      .from('products')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (data) setProducts(data);
+    setProducts(mockProducts);
     setLoading(false);
   };
 
-  const toggleOfferStatus = async (product: Product) => {
-    const { error } = await supabase
-      .from('products')
-      .update({
-        is_offer: !product.is_offer,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', product.id);
-
-    if (!error) {
-      setProducts(
-        products.map((p) => (p.id === product.id ? { ...p, is_offer: !p.is_offer } : p))
-      );
-    }
+  const toggleOfferStatus = (product: Product) => {
+    setProducts(
+      products.map((p) => (p.id === product.id ? { ...p, is_offer: !p.is_offer } : p))
+    );
   };
 
-  const updateOfferPrice = async (productId: string, offerPrice: number | null) => {
-    const { error } = await supabase
-      .from('products')
-      .update({
-        offer_price: offerPrice,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', productId);
-
-    if (!error) {
-      setProducts(
-        products.map((p) => (p.id === productId ? { ...p, offer_price: offerPrice } : p))
-      );
-    }
+  const updateOfferPrice = (productId: string, offerPrice: number | null) => {
+    setProducts(
+      products.map((p) => (p.id === productId ? { ...p, offer_price: offerPrice } : p))
+    );
   };
 
   const offerProducts = products.filter((p) => p.is_offer);

@@ -200,7 +200,7 @@ export function Account() {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-4">
                         <div>
                           <p className="text-gray-600">Total Amount</p>
                           <p className="font-semibold text-lg" style={{ color: '#1F2A7C' }}>
@@ -212,6 +212,14 @@ export function Account() {
                           <p className="font-semibold">{order.payment_status}</p>
                         </div>
                       </div>
+
+                      <button
+                        onClick={() => navigate(`/track-order/${order.order_number}`)}
+                        className="w-full py-2 rounded-lg font-semibold transition-all hover:shadow-md"
+                        style={{ backgroundColor: '#FDB913', color: '#1F2A7C' }}
+                      >
+                        Track Order
+                      </button>
                     </div>
                   ))}
                 </div>

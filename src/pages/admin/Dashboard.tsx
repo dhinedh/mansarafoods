@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Package, ShoppingCart, Users, Clock } from 'lucide-react';
 import { AdminLayout } from '../../components/AdminLayout';
-import { supabase } from '../../lib/supabase';
+import { mockProducts, mockOrders } from '../../data/mockData';
 
 export function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -17,24 +17,24 @@ export function AdminDashboard() {
     fetchStats();
   }, []);
 
-  const fetchStats = async () => {
+  const fetchStats = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const [products, orders, todayOrders, customers, pendingOrders] = await Promise.all([
-      supabase.from('products').select('id', { count: 'exact', head: true }),
-      supabase.from('orders').select('id', { count: 'exact', head: true }),
-      supabase.from('orders').select('id', { count: 'exact', head: true }).gte('created_at', today.toISOString()),
-      supabase.from('profiles').select('id', { count: 'exact', head: true }),
-      supabase.from('orders').select('id', { count: 'exact', head: true }).eq('order_status', 'pending'),
-    ]);
+    const allOrders = mockOrders;
+    const todayOrdersCount = allOrders.filter(order => {
+      const orderDate = new Date(order.created_at);
+      return orderDate >= today;
+    }).length;
+
+    const pendingOrdersCount = allOrders.filter(order => order.order_status === 'pending').length;
 
     setStats({
-      totalProducts: products.count || 0,
-      totalOrders: orders.count || 0,
-      todayOrders: todayOrders.count || 0,
-      totalCustomers: customers.count || 0,
-      pendingOrders: pendingOrders.count || 0,
+      totalProducts: mockProducts.length,
+      totalOrders: allOrders.length,
+      todayOrders: todayOrdersCount,
+      totalCustomers: 2,
+      pendingOrders: pendingOrdersCount,
     });
   };
 

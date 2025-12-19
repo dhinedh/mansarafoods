@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 import { AdminLayout } from '../../components/AdminLayout';
-import { supabase } from '../../lib/supabase';
+import { mockProducts } from '../../data/mockData';
 import { Product } from '../../types/database';
 
 export function AdminProducts() {
@@ -13,25 +13,15 @@ export function AdminProducts() {
     fetchProducts();
   }, []);
 
-  const fetchProducts = async () => {
+  const fetchProducts = () => {
     setLoading(true);
-    const { data } = await supabase
-      .from('products')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (data) setProducts(data);
+    setProducts(mockProducts);
     setLoading(false);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
     if (!confirm('Are you sure you want to delete this product?')) return;
-
-    const { error } = await supabase.from('products').delete().eq('id', id);
-
-    if (!error) {
-      setProducts(products.filter((p) => p.id !== id));
-    }
+    alert('Delete functionality is view-only in demo mode');
   };
 
   return (
