@@ -5,7 +5,14 @@ export function Footer() {
   return (
     <footer className="text-white" style={{ backgroundColor: '#1F2A7C' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div className="space-y-4">
+            <img
+              src="/logo.png"
+              alt="MANSARA FOODS"
+              className="h-20 w-auto bg-white p-2 rounded-lg"
+            />
+          </div>
           <div>
             <h3 className="text-lg font-semibold mb-4">Get to Know Us</h3>
             <ul className="space-y-2">

@@ -7,7 +7,7 @@ export function Settings() {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     website_name: 'MANSARA FOODS',
-    logo_url: '',
+    logo_url: '/logo.png',
     contact_email: 'mansarafoods@gmail.com',
     contact_phone: '+91 88388 87064',
     address: 'No. 15, Government Hospital Opposite, Timiri Road, Kalavai, Ranipet, Tamil Nadu – 632506, India',

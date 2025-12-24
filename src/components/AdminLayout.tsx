@@ -55,9 +55,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     <div className="min-h-screen flex" style={{ backgroundColor: '#FFFDF7' }}>
       <aside className="w-64 bg-white shadow-lg">
         <div className="p-6 border-b" style={{ borderColor: '#EDE6D6' }}>
-          <h1 className="text-2xl font-bold" style={{ color: '#1F2A7C' }}>
-            MANSARA
-          </h1>
+          <img src="/logo.png" alt="MANSARA" className="h-12 w-auto mb-2" />
           <p className="text-sm text-gray-600">Admin Panel</p>
         </div>
 
@@ -71,8 +69,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                 key={item.path}
                 to={item.path}
                 className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive
-                    ? 'font-semibold'
-                    : 'text-gray-600 hover:bg-gray-50'
+                  ? 'font-semibold'
+                  : 'text-gray-600 hover:bg-gray-50'
                   }`}
                 style={isActive ? { backgroundColor: '#FFF2CC', color: '#1F2A7C' } : {}}
               >
